@@ -25,7 +25,6 @@
 
 ### Пользовательские интерфейсы
 - **Web UI**: [https://frontend.hse-llm-project-2026.ru/](https://frontend.hse-llm-project-2026.ru/)
-- **Multi-cluster demo UI**: [https://multicluster-demo.hse-llm-project-2026.ru/](https://multicluster-demo.hse-llm-project-2026.ru/)
 
 ### API сервисы
 | Сервис | URL | Назначение |
