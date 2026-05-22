@@ -1,5 +1,3 @@
-## Hi there 👋
-
 Сервис для управления жизненным циклом LLM-моделей и inference-инфраструктурой. Платформа автоматизирует деплой моделей, валидацию перед выкладкой, маршрутизацию трафика, canary-релизы, квоты, расчёт затрат и мониторинг.
 
 ![Kubernetes](http://img.shields.io/badge/kubernetes-%23326ce5.svg?style=flat&logo=kubernetes&logoColor=white) ![Python](http://img.shields.io/badge/python-3670A0?style=flat&logo=python&logoColor=ffdd54) ![React](http://img.shields.io/badge/react-%2320232a.svg?style=flat&logo=react&logoColor=%2361DAFB)
