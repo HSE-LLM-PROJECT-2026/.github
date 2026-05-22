@@ -4,7 +4,7 @@
 
 **Демо**: [https://frontend.hse-llm-project-2026.ru/](https://frontend.hse-llm-project-2026.ru/)
 
-> Если какой-то домен недоступен, пожалуйста, напишите автору в Telegram: [@igmalysh](https://t.me/igmalysh)
+> Если возникают проблемы с инфраструктурой или любые другие сбои при работе сервиса, пожалуйста, напишите сюда: [@igmalysh](https://t.me/igmalysh)
 
 ## 🚀 Доступ к демо
 
