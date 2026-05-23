@@ -4,7 +4,7 @@
 
 > Если возникают проблемы с инфраструктурой или любые другие сбои при работе сервиса, пожалуйста, напишите сюда: [@igmalysh](https://t.me/igmalysh)
 
-## 🚀 Доступные интерфейсы
+## 🚀 Демо
 
 | Интерфейс | URL | Назначение |
 |-----------|-----|------------|
@@ -103,14 +103,13 @@
 | [quota_service](https://github.com/HSE-LLM-PROJECT-2026/quota_service) | Квоты и throttle/block/warn |
 | [cost_service](https://github.com/HSE-LLM-PROJECT-2026/cost_service) | FinOps и расчет стоимости inference |
 | [state_facade](https://github.com/HSE-LLM-PROJECT-2026/state_facade) | Realtime state facade для frontend |
-| [security-and-audit-serivce](https://github.com/HSE-LLM-PROJECT-2026/security-and-audit-serivce) | Auth, RBAC, аудит |
+| [security_and_audit_serivce](https://github.com/HSE-LLM-PROJECT-2026/security-and-audit-serivce) | Auth, RBAC, аудит |
 
 ### Frontend и Kubernetes runtime
 | Репозиторий | Описание |
 |-------------|----------|
 | [frontend](https://github.com/HSE-LLM-PROJECT-2026/frontend) | Web UI платформы |
 | [CRD-LLMDeployment-vllm](https://github.com/HSE-LLM-PROJECT-2026/CRD-LLMDeployment-vllm) | Kubernetes CRD/operator для LLMDeployment/TrafficRoute |
-| [sequence-diags](https://github.com/HSE-LLM-PROJECT-2026/sequence-diags) | Sequence и state диаграммы |
 
 ### Инфраструктурные репозитории
 | Репозиторий | Описание |
