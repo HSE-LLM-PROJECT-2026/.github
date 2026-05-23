@@ -1,8 +1,8 @@
-Сервис для управления жизненным циклом LLM-моделей и inference-инфраструктурой. Платформа автоматизирует деплой моделей, валидацию перед выкладкой, маршрутизацию трафика, canary-релизы, квоты, расчёт затрат и мониторинг.
+Платформа для управления жизненным циклом LLM-сервисов в Kubernetes. Система закрывает полный процесс работы с моделью: создание деплоймента, проверку перед вводом в эксплуатацию, маршрутизацию инференс-запросов, канареечные релизы, квоты, расчёт стоимости, аудит и мониторинг.
 
 ![Kubernetes](http://img.shields.io/badge/kubernetes-%23326ce5.svg?style=flat&logo=kubernetes&logoColor=white) ![Python](http://img.shields.io/badge/python-3670A0?style=flat&logo=python&logoColor=ffdd54) ![React](http://img.shields.io/badge/react-%2320232a.svg?style=flat&logo=react&logoColor=%2361DAFB)
 
-> Если возникают проблемы с инфраструктурой или любые другие сбои при работе сервиса, пожалуйста, напишите сюда: [@igmalysh](https://t.me/igmalysh)
+> Если возникают проблемы с инфраструктурой или любые другие сбои при работе сервиса, пишите в Telegram: [@igmalysh](https://t.me/igmalysh)
 
 ## 🚀 Демо
 
@@ -11,7 +11,15 @@
 | Web UI | [https://frontend.hse-llm-project-2026.ru/](https://frontend.hse-llm-project-2026.ru/) | Основной интерфейс платформы |
 | Grafana | [https://grafana.hse-llm-project-2026.ru/](https://grafana.hse-llm-project-2026.ru/) | Дашборды мониторинга |
 
-## 🧩 Основные компоненты системы
+## Общая идея
+
+Платформа построена по принципу разделения control plane и runtime plane.
+
+Control plane отвечает за бизнес-логику: деплой моделей, маршрутизацию, релизы, валидацию, автоскейлинг, квоты, расчёт стоимости и аудит. Runtime plane — это Kubernetes-кластеры, в которых запускаются LLM-сервисы.
+
+Пользователь работает с платформой через frontend и API доменных backend-сервисов. Kubernetes напрямую пользователю не открывается: все операции с LLMDeployment, TrafficRoute, HTTPRoute, Deployment и Service выполняются через backend-логику и оператор.
+
+## Основные компоненты системы
 
 ### Пользовательский слой
 
@@ -23,113 +31,116 @@
 
 | Сервис | Назначение |
 |--------|------------|
-| Deployment service | Жизненный цикл LLM-деплойментов и запись `LLMDeployment CR` |
-| Routing service | Управление маршрутами и весами трафика через `TrafficRoute CRD` |
-| Inference gateway | OpenAI-compatible входная точка для inference-запросов |
+| Deployment service | Отвечает за жизненный цикл LLM-деплойментов: создание, удаление, обновление, redeploy и запуск валидации |
+| Routing service | Управляет маршрутами и весами трафика между backend-деплойментами через TrafficRoute CRD |
+| Inference gateway | Принимает OpenAI-compatible инференс-запросы, проверяет доступ и проксирует вызов в vLLM |
 
 ### Automation
 
 | Сервис | Назначение |
 |--------|------------|
-| Validation service | Проверка модели перед переводом в рабочий статус |
-| Release controller | Canary rollout, pause/resume и rollback |
-| Autoscaler service | Масштабирование реплик по метрикам нагрузки |
+| Validation service | Проверяет модель перед переводом в рабочий статус: readiness, endpoints, load test и SLO-метрики |
+| Release controller | Управляет канареечными релизами, поэтапно меняет веса трафика и выполняет rollback при нарушении SLO |
+| Autoscaler service | Масштабирует реплики LLM-деплойментов на основе метрик нагрузки из Prometheus |
 
 ### Governance и FinOps
 
 | Сервис | Назначение |
 |--------|------------|
-| Quota service | Квоты, лимиты, приоритеты и сценарии block/throttle/warn |
-| Cost service | Расчет стоимости inference и FinOps-аналитика |
-| Security & Audit service | Auth, RBAC, технические токены и журнал аудита |
-| State facade | Агрегированное состояние платформы для realtime UI |
+| Quota service | Хранит квоты, проверяет лимиты потребления и применяет сценарии block, throttle и warn |
+| Cost service | Считает стоимость инференс-запросов и формирует FinOps-агрегации |
+| Security & Audit service | Отвечает за JWT, RBAC, технические токены и журнал аудита |
+| State facade | Отдаёт frontend агрегированное состояние платформы и runtime-сущностей |
 
 ### Kubernetes Runtime
 
 | Компонент | Назначение |
 |-----------|------------|
-| LLMDeployment CRD | Декларативное описание LLM-сервиса |
-| TrafficRoute CRD | Декларативное описание маршрута и весов трафика |
-| Kubernetes operator | Приведение CRD к Kubernetes Deployment, Service и HTTPRoute |
-| vLLM | Runtime для OpenAI-compatible inference |
+| LLMDeployment CRD | Декларативное описание LLM-сервиса: модель, версия, кластер, реплики и параметры инференса |
+| TrafficRoute CRD | Декларативное описание маршрута и весов трафика между деплойментами |
+| Kubernetes operator | Следит за CRD и приводит фактическое состояние Kubernetes к желаемому |
+| vLLM | Runtime для OpenAI-compatible инференса |
 
 ### Инфраструктура
 
 | Компонент | Назначение |
 |-----------|------------|
-| PostgreSQL | Хранение бизнес-состояния платформы |
-| Prometheus | Сбор метрик сервисов, runtime и инфраструктуры |
+| PostgreSQL | Хранение бизнес-состояния платформы: деплойменты, релизы, квоты, затраты, пользователи и аудит |
+| Prometheus | Сбор метрик сервисов, vLLM-подов, Kubernetes и инфраструктуры |
 | Grafana | Визуализация метрик и дашборды |
 | Loki | Сбор и хранение логов |
 | Gateway API + Cilium | Сетевой слой и маршрутизация HTTP-трафика |
 | MetalLB / ExternalDNS / CoreDNS | Внешняя публикация и DNS |
 
-## 🛠️ Технологический стек
+## Технологический стек
 
-- **Бекенд**: Python 3.11, FastAPI
-- **Фронтенд**: React, TypeScript, Vite
-- **База данных**: PostgreSQL
-- **Оркестрация**: Kubernetes, Docker, Helm
-- **LLM runtime**: vLLM
-- **Сетевая часть**: Gateway API, Cilium, MetalLB, ExternalDNS
-- **Мониторинг**: Prometheus, Grafana, Loki
+- Бекенд: Python 3.11, FastAPI
+- Фронтенд: React, TypeScript, Vite
+- База данных: PostgreSQL
+- Оркестрация: Kubernetes, Docker, Helm
+- LLM runtime: vLLM
+- Kubernetes operator: kopf
+- Сетевая часть: Gateway API, Cilium, MetalLB, ExternalDNS
+- Мониторинг: Prometheus, Grafana, Loki
 
-## 📊 Что мониторится
+## Что мониторится
 
-- инфраструктурные метрики кластера и нод;
-- метрики inference: latency, throughput, queue, error rate;
-- метрики релизов и автоскейлинга;
-- бизнес-метрики затрат и квот.
+- состояние сервисов control plane;
+- состояние LLM-деплойментов и pod-ов;
+- latency, throughput, queue length и error rate инференс-запросов;
+- метрики канареечных релизов и автоскейлинга;
+- потребление токенов, квоты и стоимость инференса;
+- инфраструктурные метрики нод и кластеров.
 
-## 🗂️ Репозитории проекта
+## Репозитории проекта
 
 ### Management APIs
 | Репозиторий | Описание |
 |-------------|----------|
-| [deployment_service](https://github.com/HSE-LLM-PROJECT-2026/deployment_service) | Deployment lifecycle service |
-| [routing_service](https://github.com/HSE-LLM-PROJECT-2026/routing_service) | Управление маршрутами и весами трафика |
-| [inference_gateway](https://github.com/HSE-LLM-PROJECT-2026/inference_gateway) | OpenAI-compatible inference gateway |
+| [deployment_service](https://github.com/HSE-LLM-PROJECT-2026/deployment_service) | Сервис жизненного цикла LLM-деплойментов |
+| [routing_service](https://github.com/HSE-LLM-PROJECT-2026/routing_service) | Сервис маршрутов и весов трафика |
+| [inference_gateway](https://github.com/HSE-LLM-PROJECT-2026/inference_gateway) | OpenAI-compatible gateway для инференс-запросов |
 
 ### Automation controllers
 | Репозиторий | Описание |
 |-------------|----------|
-| [validation_service](https://github.com/HSE-LLM-PROJECT-2026/validation_service) | Pre-release validation и SLO checks |
-| [release_controller](https://github.com/HSE-LLM-PROJECT-2026/release_controller) | Canary rollout и rollback логика |
-| [autoscaler_service](https://github.com/HSE-LLM-PROJECT-2026/autoscaler_service) | Политики autoscaling |
+| [validation_service](https://github.com/HSE-LLM-PROJECT-2026/validation_service) | Сервис проверки модели перед вводом в эксплуатацию |
+| [release_controller](https://github.com/HSE-LLM-PROJECT-2026/release_controller) | Контроллер канареечных релизов и rollback |
+| [autoscaler_service](https://github.com/HSE-LLM-PROJECT-2026/autoscaler_service) | Сервис политик горизонтального масштабирования |
 
 ### Governance и FinOps
 | Репозиторий | Описание |
 |-------------|----------|
-| [quota_service](https://github.com/HSE-LLM-PROJECT-2026/quota_service) | Квоты и throttle/block/warn |
-| [cost_service](https://github.com/HSE-LLM-PROJECT-2026/cost_service) | FinOps и расчет стоимости inference |
-| [state_facade](https://github.com/HSE-LLM-PROJECT-2026/state_facade) | Realtime state facade для frontend |
-| [security_and_audit_serivce](https://github.com/HSE-LLM-PROJECT-2026/security-and-audit-serivce) | Auth, RBAC, аудит |
+| [quota_service](https://github.com/HSE-LLM-PROJECT-2026/quota_service) | Сервис квот и учёта потребления |
+| [cost_service](https://github.com/HSE-LLM-PROJECT-2026/cost_service) | Сервис расчёта стоимости инференса |
+| [state_facade](https://github.com/HSE-LLM-PROJECT-2026/state_facade) | Realtime facade для frontend |
+| [security_and_audit_serivce](https://github.com/HSE-LLM-PROJECT-2026/security-and-audit-serivce) | Сервис аутентификации, RBAC и аудита |
 
 ### Frontend и Kubernetes runtime
 | Репозиторий | Описание |
 |-------------|----------|
 | [frontend](https://github.com/HSE-LLM-PROJECT-2026/frontend) | Web UI платформы |
-| [CRD-LLMDeployment-vllm](https://github.com/HSE-LLM-PROJECT-2026/CRD-LLMDeployment-vllm) | Kubernetes CRD/operator для LLMDeployment/TrafficRoute |
+| [CRD-LLMDeployment-vllm](https://github.com/HSE-LLM-PROJECT-2026/CRD-LLMDeployment-vllm) | CRD и Kubernetes operator для LLMDeployment и TrafficRoute |
 
 ### Инфраструктурные репозитории
 | Репозиторий | Описание |
 |-------------|----------|
-| [cluster-config](https://github.com/HSE-LLM-PROJECT-2026/cluster-config) | Terraform/Talos и инфраструктурные скрипты |
-| [k8s-dns-pipeline](https://github.com/HSE-LLM-PROJECT-2026/k8s-dns-pipeline) | DNS/Gateway/network pipeline |
-| [monitoring-deployment](https://github.com/HSE-LLM-PROJECT-2026/monitoring-deployment) | Grafana/Prometheus/Loki deployment и dashboards |
-| [postgresql-deployment](https://github.com/HSE-LLM-PROJECT-2026/postgresql-deployment) | PostgreSQL deployment |
+| [cluster-config](https://github.com/HSE-LLM-PROJECT-2026/cluster-config) | Terraform, Talos и конфигурация кластеров |
+| [k8s-dns-pipeline](https://github.com/HSE-LLM-PROJECT-2026/k8s-dns-pipeline) | DNS, Gateway API, Cilium и внешняя публикация сервисов |
+| [monitoring-deployment](https://github.com/HSE-LLM-PROJECT-2026/monitoring-deployment) | Prometheus, Grafana, Loki и дашборды |
+| [postgresql-deployment](https://github.com/HSE-LLM-PROJECT-2026/postgresql-deployment) | Развёртывание PostgreSQL |
 
-## ⚠️ Важная информация
+## Важная информация
 
-**Проект является учебно-исследовательской разработкой. Автор не несет ответственности за:**
+Проект является учебно-исследовательской разработкой. Автор не несет ответственности за:
 
-1. Использование системы как production-grade решения без дополнительного hardening.
-2. Прямое использование результатов inference для критичных решений.
-3. Любые последствия эксплуатации без резервирования и backup-политик.
+1. использование системы как промышленного решения без дополнительного усиления безопасности;
+2. прямое использование результатов инференса для критичных решений;
+3. любые последствия эксплуатации без резервирования и backup-политик.
 
 Использование осуществляется на свой риск.
 
-## 📬 Контакт
+## Контакты
 
 По вопросам проекта:
 - **Telegram**: [@igmalysh](https://t.me/igmalysh)
