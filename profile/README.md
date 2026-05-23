@@ -17,7 +17,7 @@
 
 Control plane отвечает за бизнес-логику: деплой моделей, маршрутизацию, релизы, валидацию, автоскейлинг, квоты, расчёт стоимости и аудит. Runtime plane — это Kubernetes-кластеры, в которых запускаются LLM-сервисы.
 
-Пользователь работает с платформой через frontend и API доменных backend-сервисов. Kubernetes напрямую пользователю не открывается: все операции с LLMDeployment, TrafficRoute, HTTPRoute, Deployment и Service выполняются через backend-логику и оператор.
+Пользователь работает с платформой через frontend и API доменных backend-сервисов. Kubernetes напрямую пользователю не открывается: все операции с LLMDeployment, TrafficRoute, HTTPRoute, Deployment и Service выполняются через backend-логику и операторы.
 
 ## Основные компоненты системы
 
