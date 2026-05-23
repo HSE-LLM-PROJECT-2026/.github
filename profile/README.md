@@ -2,43 +2,67 @@
 
 ![Kubernetes](http://img.shields.io/badge/kubernetes-%23326ce5.svg?style=flat&logo=kubernetes&logoColor=white) ![Python](http://img.shields.io/badge/python-3670A0?style=flat&logo=python&logoColor=ffdd54) ![React](http://img.shields.io/badge/react-%2320232a.svg?style=flat&logo=react&logoColor=%2361DAFB)
 
-**Демо**: [https://frontend.hse-llm-project-2026.ru/](https://frontend.hse-llm-project-2026.ru/)
-
 > Если возникают проблемы с инфраструктурой или любые другие сбои при работе сервиса, пожалуйста, напишите сюда: [@igmalysh](https://t.me/igmalysh)
 
-## 🚀 Доступ к демо
+## 🚀 Доступные интерфейсы
 
-### Для тестирования системы:
-1. **Вход через UI платформы**
-   - откройте [frontend.hse-llm-project-2026.ru](https://frontend.hse-llm-project-2026.ru/)
-   - используйте тестовый аккаунт или зарегистрируйте новый
-
-2. **Прямой доступ к API**
-   - management API: [https://deployment.hse-llm-project-2026.ru](https://deployment.hse-llm-project-2026.ru)
-   - security/audit API: [https://audit.hse-llm-project-2026.ru](https://audit.hse-llm-project-2026.ru)
-
-3. **Мониторинг и статус**
-   - Grafana: [https://grafana.hse-llm-project-2026.ru](https://grafana.hse-llm-project-2026.ru)
-   - Status page: [https://status.hse-llm-project-2026.ru](https://status.hse-llm-project-2026.ru)
+| Интерфейс | URL | Назначение |
+|-----------|-----|------------|
+| Web UI | [https://frontend.hse-llm-project-2026.ru/](https://frontend.hse-llm-project-2026.ru/) | Основной интерфейс платформы |
+| Grafana | [https://grafana.hse-llm-project-2026.ru/](https://grafana.hse-llm-project-2026.ru/) | Дашборды мониторинга |
 
 ## 🧩 Основные компоненты системы
 
-### Пользовательские интерфейсы
-- **Web UI**: [https://frontend.hse-llm-project-2026.ru/](https://frontend.hse-llm-project-2026.ru/)
+### Пользовательский слой
 
-### API сервисы
-| Сервис | URL | Назначение |
-|-------|-----|------------|
-| Deployment API | https://deployment.hse-llm-project-2026.ru | Управление деплойментами, релизами, маршрутами, квотами, затратами |
-| Security & Audit API | https://audit.hse-llm-project-2026.ru | JWT, RBAC, роли, команды, аудит |
-| Inference Gateway | через deployment домен | OpenAI-compatible inference и proxy-потоки |
+| Компонент | Назначение |
+|-----------|------------|
+| Frontend | Web UI для управления деплойментами, релизами, трафиком, квотами, затратами, доступами и аудитом |
 
-### Инструменты администрирования
-| Инструмент | URL | Доступ |
-|------------|-----|--------|
-| Grafana | https://grafana.hse-llm-project-2026.ru | `admin:admin` (если не изменено в окружении) |
-| Prometheus | Внутри кластера | service-only |
-| Loki | Внутри кластера | service-only |
+### Control Plane
+
+| Сервис | Назначение |
+|--------|------------|
+| Deployment service | Жизненный цикл LLM-деплойментов и запись `LLMDeployment CR` |
+| Routing service | Управление маршрутами и весами трафика через `TrafficRoute CRD` |
+| Inference gateway | OpenAI-compatible входная точка для inference-запросов |
+
+### Automation
+
+| Сервис | Назначение |
+|--------|------------|
+| Validation service | Проверка модели перед переводом в рабочий статус |
+| Release controller | Canary rollout, pause/resume и rollback |
+| Autoscaler service | Масштабирование реплик по метрикам нагрузки |
+
+### Governance и FinOps
+
+| Сервис | Назначение |
+|--------|------------|
+| Quota service | Квоты, лимиты, приоритеты и сценарии block/throttle/warn |
+| Cost service | Расчет стоимости inference и FinOps-аналитика |
+| Security & Audit service | Auth, RBAC, технические токены и журнал аудита |
+| State facade | Агрегированное состояние платформы для realtime UI |
+
+### Kubernetes Runtime
+
+| Компонент | Назначение |
+|-----------|------------|
+| LLMDeployment CRD | Декларативное описание LLM-сервиса |
+| TrafficRoute CRD | Декларативное описание маршрута и весов трафика |
+| Kubernetes operator | Приведение CRD к Kubernetes Deployment, Service и HTTPRoute |
+| vLLM | Runtime для OpenAI-compatible inference |
+
+### Инфраструктура
+
+| Компонент | Назначение |
+|-----------|------------|
+| PostgreSQL | Хранение бизнес-состояния платформы |
+| Prometheus | Сбор метрик сервисов, runtime и инфраструктуры |
+| Grafana | Визуализация метрик и дашборды |
+| Loki | Сбор и хранение логов |
+| Gateway API + Cilium | Сетевой слой и маршрутизация HTTP-трафика |
+| MetalLB / ExternalDNS / CoreDNS | Внешняя публикация и DNS |
 
 ## 🛠️ Технологический стек
 
@@ -59,21 +83,29 @@
 
 ## 🗂️ Репозитории проекта
 
-### Control Plane и сервисы
+### Management APIs
 | Репозиторий | Описание |
 |-------------|----------|
 | [deployment_service](https://github.com/HSE-LLM-PROJECT-2026/deployment_service) | Deployment lifecycle service |
 | [routing_service](https://github.com/HSE-LLM-PROJECT-2026/routing_service) | Управление маршрутами и весами трафика |
 | [inference_gateway](https://github.com/HSE-LLM-PROJECT-2026/inference_gateway) | OpenAI-compatible inference gateway |
+
+### Automation controllers
+| Репозиторий | Описание |
+|-------------|----------|
 | [validation_service](https://github.com/HSE-LLM-PROJECT-2026/validation_service) | Pre-release validation и SLO checks |
 | [release_controller](https://github.com/HSE-LLM-PROJECT-2026/release_controller) | Canary rollout и rollback логика |
 | [autoscaler_service](https://github.com/HSE-LLM-PROJECT-2026/autoscaler_service) | Политики autoscaling |
+
+### Governance и FinOps
+| Репозиторий | Описание |
+|-------------|----------|
 | [quota_service](https://github.com/HSE-LLM-PROJECT-2026/quota_service) | Квоты и throttle/block/warn |
 | [cost_service](https://github.com/HSE-LLM-PROJECT-2026/cost_service) | FinOps и расчет стоимости inference |
 | [state_facade](https://github.com/HSE-LLM-PROJECT-2026/state_facade) | Realtime state facade для frontend |
 | [security-and-audit-serivce](https://github.com/HSE-LLM-PROJECT-2026/security-and-audit-serivce) | Auth, RBAC, аудит |
 
-### Frontend, CRD и диаграммы
+### Frontend и Kubernetes runtime
 | Репозиторий | Описание |
 |-------------|----------|
 | [frontend](https://github.com/HSE-LLM-PROJECT-2026/frontend) | Web UI платформы |
