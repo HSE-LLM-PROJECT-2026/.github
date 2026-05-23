@@ -9,7 +9,7 @@
 | Интерфейс | URL | Назначение |
 |-----------|-----|------------|
 | Web UI | [https://frontend.hse-llm-project-2026.ru/](https://frontend.hse-llm-project-2026.ru/) | Основной интерфейс платформы |
-| Grafana | [https://grafana.hse-llm-project-2026.ru/](https://grafana.hse-llm-project-2026.ru/) | Дашборды мониторинга |
+| Grafana | [https://grafana.hse-llm-project-2026.ru/](https://grafana.hse-llm-project-2026.ru/) | Дашборды мониторинга, доступ `admin / admin` |
 
 ## Общая идея
 
