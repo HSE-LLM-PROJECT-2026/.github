@@ -11,7 +11,7 @@
 | Web UI | [https://frontend.hse-llm-project-2026.ru/](https://frontend.hse-llm-project-2026.ru/) | Основной интерфейс платформы |
 | Grafana | [https://grafana.hse-llm-project-2026.ru/](https://grafana.hse-llm-project-2026.ru/) | Дашборды мониторинга, доступ `admin / admin` |
 
-## Общая идея
+## 🧠 Общая идея
 
 Платформа построена по принципу разделения control plane и runtime plane.
 
@@ -19,15 +19,15 @@ Control plane отвечает за бизнес-логику: деплой мо
 
 Пользователь работает с платформой через frontend и API доменных backend-сервисов. Kubernetes напрямую пользователю не открывается: все операции с LLMDeployment, TrafficRoute, HTTPRoute, Deployment и Service выполняются через backend-логику и операторы.
 
-## Основные компоненты системы
+## 🧩 Основные компоненты системы
 
-### Пользовательский слой
+### 👤 Пользовательский слой
 
 | Компонент | Назначение |
 |-----------|------------|
 | Frontend | Web UI для управления деплойментами, релизами, трафиком, квотами, затратами, доступами и аудитом |
 
-### Control Plane
+### 🕹️ Control Plane
 
 | Сервис | Назначение |
 |--------|------------|
@@ -35,7 +35,7 @@ Control plane отвечает за бизнес-логику: деплой мо
 | Routing service | Управляет маршрутами и весами трафика между backend-деплойментами через TrafficRoute CRD |
 | Inference gateway | Принимает OpenAI-compatible инференс-запросы, проверяет доступ и проксирует вызов в vLLM |
 
-### Automation
+### ⚙️ Automation
 
 | Сервис | Назначение |
 |--------|------------|
@@ -43,7 +43,7 @@ Control plane отвечает за бизнес-логику: деплой мо
 | Release controller | Управляет канареечными релизами, поэтапно меняет веса трафика и выполняет rollback при нарушении SLO |
 | Autoscaler service | Масштабирует реплики LLM-деплойментов на основе метрик нагрузки из Prometheus |
 
-### Governance и FinOps
+### 🧾 Governance и FinOps
 
 | Сервис | Назначение |
 |--------|------------|
@@ -52,7 +52,7 @@ Control plane отвечает за бизнес-логику: деплой мо
 | Security & Audit service | Отвечает за JWT, RBAC, технические токены и журнал аудита |
 | State facade | Отдаёт frontend агрегированное состояние платформы и runtime-сущностей |
 
-### Kubernetes Runtime
+### ☸️ Kubernetes Runtime
 
 | Компонент | Назначение |
 |-----------|------------|
@@ -61,7 +61,7 @@ Control plane отвечает за бизнес-логику: деплой мо
 | Kubernetes operator | Следит за CRD и приводит фактическое состояние Kubernetes к желаемому |
 | vLLM | Runtime для OpenAI-compatible инференса |
 
-### Инфраструктура
+### 🏗️ Инфраструктура
 
 | Компонент | Назначение |
 |-----------|------------|
@@ -72,7 +72,7 @@ Control plane отвечает за бизнес-логику: деплой мо
 | Gateway API + Cilium | Сетевой слой и маршрутизация HTTP-трафика |
 | MetalLB / ExternalDNS / CoreDNS | Внешняя публикация и DNS |
 
-## Технологический стек
+## 🛠️ Технологический стек
 
 - Бекенд: Python 3.11, FastAPI
 - Фронтенд: React, TypeScript, Vite
@@ -83,7 +83,7 @@ Control plane отвечает за бизнес-логику: деплой мо
 - Сетевая часть: Gateway API, Cilium, MetalLB, ExternalDNS
 - Мониторинг: Prometheus, Grafana, Loki
 
-## Что мониторится
+## 📊 Что мониторится
 
 - состояние сервисов control plane;
 - состояние LLM-деплойментов и pod-ов;
@@ -92,23 +92,23 @@ Control plane отвечает за бизнес-логику: деплой мо
 - потребление токенов, квоты и стоимость инференса;
 - инфраструктурные метрики нод и кластеров.
 
-## Репозитории проекта
+## 🗂️ Репозитории проекта
 
-### Management APIs
+### 🔌 Management APIs
 | Репозиторий | Описание |
 |-------------|----------|
 | [deployment_service](https://github.com/HSE-LLM-PROJECT-2026/deployment_service) | Сервис жизненного цикла LLM-деплойментов |
 | [routing_service](https://github.com/HSE-LLM-PROJECT-2026/routing_service) | Сервис маршрутов и весов трафика |
 | [inference_gateway](https://github.com/HSE-LLM-PROJECT-2026/inference_gateway) | OpenAI-compatible gateway для инференс-запросов |
 
-### Automation controllers
+### ⚙️ Automation controllers
 | Репозиторий | Описание |
 |-------------|----------|
 | [validation_service](https://github.com/HSE-LLM-PROJECT-2026/validation_service) | Сервис проверки модели перед вводом в эксплуатацию |
 | [release_controller](https://github.com/HSE-LLM-PROJECT-2026/release_controller) | Контроллер канареечных релизов и rollback |
 | [autoscaler_service](https://github.com/HSE-LLM-PROJECT-2026/autoscaler_service) | Сервис политик горизонтального масштабирования |
 
-### Governance и FinOps
+### 🧾 Governance и FinOps
 | Репозиторий | Описание |
 |-------------|----------|
 | [quota_service](https://github.com/HSE-LLM-PROJECT-2026/quota_service) | Сервис квот и учёта потребления |
@@ -116,13 +116,13 @@ Control plane отвечает за бизнес-логику: деплой мо
 | [state_facade](https://github.com/HSE-LLM-PROJECT-2026/state_facade) | Realtime facade для frontend |
 | [security_and_audit_serivce](https://github.com/HSE-LLM-PROJECT-2026/security-and-audit-serivce) | Сервис аутентификации, RBAC и аудита |
 
-### Frontend и Kubernetes runtime
+### 🖥️ Frontend и Kubernetes runtime
 | Репозиторий | Описание |
 |-------------|----------|
 | [frontend](https://github.com/HSE-LLM-PROJECT-2026/frontend) | Web UI платформы |
 | [CRD-LLMDeployment-vllm](https://github.com/HSE-LLM-PROJECT-2026/CRD-LLMDeployment-vllm) | CRD и Kubernetes operator для LLMDeployment и TrafficRoute |
 
-### Инфраструктурные репозитории
+### 🏗️ Инфраструктурные репозитории
 | Репозиторий | Описание |
 |-------------|----------|
 | [cluster-config](https://github.com/HSE-LLM-PROJECT-2026/cluster-config) | Terraform, Talos и конфигурация кластеров |
@@ -130,7 +130,7 @@ Control plane отвечает за бизнес-логику: деплой мо
 | [monitoring-deployment](https://github.com/HSE-LLM-PROJECT-2026/monitoring-deployment) | Prometheus, Grafana, Loki и дашборды |
 | [postgresql-deployment](https://github.com/HSE-LLM-PROJECT-2026/postgresql-deployment) | Развёртывание PostgreSQL |
 
-## Важная информация
+## ⚠️ Важная информация
 
 Проект является учебно-исследовательской разработкой. Автор не несет ответственности за:
 
@@ -140,7 +140,7 @@ Control plane отвечает за бизнес-логику: деплой мо
 
 Использование осуществляется на свой риск.
 
-## Контакты
+## 📬 Контакты
 
 По вопросам проекта:
 - **Telegram**: [@igmalysh](https://t.me/igmalysh)
