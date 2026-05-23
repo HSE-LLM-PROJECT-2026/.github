@@ -11,7 +11,7 @@
 | Web UI | [https://frontend.hse-llm-project-2026.ru/](https://frontend.hse-llm-project-2026.ru/) | Основной интерфейс платформы |
 | Grafana | [https://grafana.hse-llm-project-2026.ru/](https://grafana.hse-llm-project-2026.ru/) | Дашборды мониторинга, доступ `admin / admin` |
 
-## 🧠 Общая идея
+## 🧭 Общая идея
 
 Платформа построена по принципу разделения control plane и runtime plane.
 
